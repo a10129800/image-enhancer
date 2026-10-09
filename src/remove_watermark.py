@@ -1,6 +1,6 @@
-import os
 import sys
 import subprocess
+import threading
 from pathlib import Path
 from PIL import Image, ImageFilter, ImageDraw
 
@@ -94,6 +94,5 @@ def install_opencv(callback=None):
             success = False
         if callback:
             callback(success)
-    import threading
     t = threading.Thread(target=_run, daemon=True)
     t.start()

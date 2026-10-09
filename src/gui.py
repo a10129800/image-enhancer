@@ -18,11 +18,9 @@ SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
 BIN_DIR = ROOT_DIR / "bin"
 
-# 匯入浮水印消除模組
-try:
-    from remove_watermark import remove_watermark_inpaint, has_opencv, install_opencv
-except ImportError:
-    from src.remove_watermark import remove_watermark_inpaint, has_opencv, install_opencv
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+from remove_watermark import remove_watermark_inpaint, has_opencv, install_opencv
 
 class EnhancerApp(tk.Tk):
     def __init__(self):
@@ -56,7 +54,6 @@ class EnhancerApp(tk.Tk):
         self.wm_last_pos = None
         self.wm_pan_start = None        # 滑鼠右鍵平移拖曳起點
 
-        self._organize_workspace()
         self._setup_icon()
         self._setup_style()
         self._build_ui()
@@ -66,68 +63,11 @@ class EnhancerApp(tk.Tk):
 
     def _setup_icon(self):
         ico_path = ROOT_DIR / "assets" / "app.ico"
-        png_path = ROOT_DIR / "assets" / "app_icon.png"
-        icon_source = Path(r"C:\Users\mice\.gemini\antigravity-ide\brain\c76d24df-8eaa-44b9-90c0-75c423faeaad\app_icon_1791528717867.jpg")
-
-        if not ico_path.exists() and icon_source.exists():
-            try:
-                img = Image.open(icon_source)
-                ico_path.parent.mkdir(exist_ok=True)
-                img.save(ico_path, format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)])
-                img.save(png_path)
-            except Exception:
-                pass
-
         if ico_path.exists():
             try:
                 self.iconbitmap(str(ico_path))
             except Exception:
                 pass
-
-        # 自動生成帶有精美圖示的本機 Windows 捷徑 (.lnk)
-        lnk_path = ROOT_DIR / "圖片畫質提高工具.lnk"
-        bat_target = ROOT_DIR / "run_enhance.bat"
-        if not lnk_path.exists() and ico_path.exists() and bat_target.exists():
-            try:
-                vbs_code = f'Set ws=CreateObject("WScript.Shell"):Set l=ws.CreateShortcut("{lnk_path}"):l.TargetPath="{bat_target}":l.WorkingDirectory="{ROOT_DIR}":l.IconLocation="{ico_path},0":l.Save'
-                vbs_temp = ROOT_DIR / "create_lnk.vbs"
-                vbs_temp.write_text(vbs_code, encoding="utf-8")
-                subprocess.run(["cscript", "//nologo", str(vbs_temp)], capture_output=True)
-                if vbs_temp.exists():
-                    vbs_temp.unlink()
-            except Exception:
-                pass
-
-    def _organize_workspace(self):
-        BIN_DIR.mkdir(parents=True, exist_ok=True)
-        for bin_file in ["realesrgan-ncnn-vulkan.exe", "vcomp140.dll", "vcomp140d.dll"]:
-            p = ROOT_DIR / bin_file
-            if p.exists():
-                target = BIN_DIR / bin_file
-                if not target.exists():
-                    shutil.move(str(p), str(target))
-                else:
-                    p.unlink()
-
-        models_root = ROOT_DIR / "models"
-        if models_root.exists() and models_root != (BIN_DIR / "models"):
-            target_models = BIN_DIR / "models"
-            target_models.mkdir(parents=True, exist_ok=True)
-            for m in models_root.iterdir():
-                dest = target_models / m.name
-                if not dest.exists():
-                    shutil.move(str(m), str(dest))
-            try:
-                shutil.rmtree(str(models_root))
-            except Exception:
-                pass
-
-        assets_dir = ROOT_DIR / "assets"
-        assets_dir.mkdir(exist_ok=True)
-        for img_name in ["DEMO.png", "Demo2.png"]:
-            p = ROOT_DIR / img_name
-            if p.exists() and not (assets_dir / img_name).exists():
-                shutil.move(str(p), str(assets_dir / img_name))
 
     def _setup_style(self):
         self.style = ttk.Style(self)

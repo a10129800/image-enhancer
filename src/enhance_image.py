@@ -1,6 +1,6 @@
 import sys, shutil, subprocess
 from pathlib import Path
-from tkinter import Tk, filedialog, messagebox
+from tkinter import messagebox
 
 SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
