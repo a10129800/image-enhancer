@@ -9,6 +9,11 @@ env/
 # 本機管理與推送腳本 (不公開至 GitHub)
 git_push.bat
 git_push.py
+build_launcher.bat
+create_release.bat
+create_release.py
+dist/
+*.lnk
 
 # Real-ESRGAN 二進位大檔 (由腳本或使用者自動下載，不進 Git 倉庫)
 bin/
