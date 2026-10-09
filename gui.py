@@ -16,9 +16,35 @@ class EnhancerApp(tk.Tk):
         self.selected_files = []
         self.is_processing = False
 
+        self._organize_workspace()
         self._setup_style()
         self._build_ui()
         self._check_engine_status()
+
+    def _organize_workspace(self):
+        assets_dir = DIR / "assets"
+        assets_dir.mkdir(exist_ok=True)
+        for img_name in ["DEMO.png", "Demo2.png"]:
+            p = DIR / img_name
+            if p.exists() and not (assets_dir / img_name).exists():
+                shutil.move(str(p), str(assets_dir / img_name))
+
+        samples_dir = DIR / "samples"
+        samples_dir.mkdir(exist_ok=True)
+        for sample_name in ["input.jpg", "input2.jpg", "onepiece_demo.mp4"]:
+            p = DIR / sample_name
+            if p.exists():
+                shutil.move(str(p), str(samples_dir / sample_name))
+
+        docs_dir = DIR / "docs"
+        docs_dir.mkdir(exist_ok=True)
+        win_readme = DIR / "README_windows.md"
+        if win_readme.exists():
+            shutil.move(str(win_readme), str(docs_dir / "realesrgan_upstream_readme.md"))
+
+        redundant_bat = DIR / "download_ai_engine.bat"
+        if redundant_bat.exists():
+            redundant_bat.unlink()
 
     def _setup_style(self):
         self.style = ttk.Style(self)

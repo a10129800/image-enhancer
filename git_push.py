@@ -43,6 +43,32 @@ def main():
         if "a10129800/image-enhancer" not in current_url:
             run_cmd(f"git remote set-url origin {REPO_URL}")
 
+    # 自動整理專案結構
+    import shutil
+    assets_dir = DIR / "assets"
+    assets_dir.mkdir(exist_ok=True)
+    for img_name in ["DEMO.png", "Demo2.png"]:
+        p = DIR / img_name
+        if p.exists() and not (assets_dir / img_name).exists():
+            shutil.move(str(p), str(assets_dir / img_name))
+
+    samples_dir = DIR / "samples"
+    samples_dir.mkdir(exist_ok=True)
+    for sample_name in ["input.jpg", "input2.jpg", "onepiece_demo.mp4"]:
+        p = DIR / sample_name
+        if p.exists():
+            shutil.move(str(p), str(samples_dir / sample_name))
+
+    docs_dir = DIR / "docs"
+    docs_dir.mkdir(exist_ok=True)
+    win_readme = DIR / "README_windows.md"
+    if win_readme.exists():
+        shutil.move(str(win_readme), str(docs_dir / "realesrgan_upstream_readme.md"))
+
+    redundant_bat = DIR / "download_ai_engine.bat"
+    if redundant_bat.exists():
+        redundant_bat.unlink()
+
     # 4. 暫存檔案 (.gitignore 會自動排除大模型)
     print("\n[3/4] 暫存檔案變更...")
     run_cmd("git add .")

@@ -7,7 +7,7 @@
 
 ## 🌟 效果對比展示 (Before & After)
 
-![效果對比 DEMO](DEMO.png)
+![效果對比 DEMO](assets/DEMO.png)
 
 > **實測效果**：原圖低解析度人物面部細節較為模糊，經過 `realesrgan-x4plus` 模型 4x 超解析度重建後，眼神、髮絲、皮膚質感與服裝金屬細節皆獲得極高清晰度重建。
 
@@ -15,7 +15,7 @@
 
 ## 🖥️ 軟體介面 (GUI Preview)
 
-![軟體主介面](Demo2.png)
+![軟體主介面](assets/Demo2.png)
 
 - **原生輕量**：採用 Python 內建 GUI，免安裝肥大的第三方視窗框架。
 - **背景執行**：批次處理時介面流暢不卡頓，具備即時進度條與狀態指示。
@@ -66,15 +66,20 @@ python enhance_image.py "C:\path\to\photo1.jpg" "C:\path\to\photo2.png"
 ## 📁 專案結構
 
 ```text
-圖片畫質提高工具/
+image-enhancer/
+├── assets/                  # 成果對比與軟體介面展示截圖
+│   ├── DEMO.png
+│   └── Demo2.png
+├── samples/                 # 測試素材範例
+├── docs/                    # 相關參考文檔
 ├── gui.py                   # 圖形化介面主程式 (Tkinter / ttk)
 ├── enhance_image.py         # 核心修復邏輯 (AI / Pillow / ffmpeg 三段式)
-├── download_ai_engine.py    # AI 引擎下載與解壓輔助腳本
-├── run_enhance.bat          # 一鍵免命令列啟動批次檔
-├── DEMO.png                 # 修復前後效果展示圖
-├── Demo2.png                # 軟體執行介面截圖
-├── realesrgan-ncnn-vulkan.exe # (已內建) Real-ESRGAN Vulkan 推理引擎
-└── models/                  # (已內建) 神經網路權重檔 (.bin, .param)
+├── download_ai_engine.py    # AI 引擎下載與配置輔助模組
+├── run_enhance.bat          # 軟體一鍵啟動入口
+├── git_push.bat             # GitHub 一鍵同步推送工具
+├── requirements.txt         # 相依套件說明
+├── LICENSE                  # MIT 開源授權
+└── README.md                # 專案完整說明文檔
 ```
 
 ---
