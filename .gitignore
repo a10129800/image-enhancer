@@ -8,7 +8,6 @@ env/
 
 # 本機管理與推送腳本 (不公開至 GitHub)
 git_push.bat
-git_push.py
 scripts/
 dist/
 *.lnk
