@@ -30,8 +30,13 @@ input*.jpg
 input*.png
 *.mp4
 
-# IDE / 系統檔案
+# IDE / 系統檔案與工作區
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.code-workspace
+
+# 本機編譯之二進位啟動器 (不進 Git 倉庫)
+圖片畫質提高工具.exe
+
