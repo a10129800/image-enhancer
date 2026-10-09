@@ -66,6 +66,8 @@ def crop_app_window(src_path: Path, dst_path1: Path, dst_path2: Path = None):
     return True
 
 if __name__ == "__main__":
-    src = Path(r"C:\Users\mice\.gemini\antigravity-ide\brain\c76d24df-8eaa-44b9-90c0-75c423faeaad\.user_uploaded\media_1791533812818.png")
+    src = Path(r"C:\Users\mice\.gemini\antigravity-ide\brain\4a990e4f-7495-4a12-af4a-bf4993b67fb1\.user_uploaded\media_1791537731563.png")
     root_dir = Path(__file__).resolve().parent.parent
-    crop_app_window(src, root_dir / "assets" / "Demo2.png", root_dir / "Demo2.png")
+    import shutil
+    shutil.copy2(str(src), str(root_dir / "assets" / "Demo2.png"))
+    print("[+] Demo2.png 已直接複製更新完成！")
