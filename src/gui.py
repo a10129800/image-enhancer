@@ -53,7 +53,9 @@ class EnhancerApp(tk.Tk):
         self.wm_effective_scale = 1.0   # 最終縮放比例
         self.wm_canvas_img_ref = None   # 防止被 GC 回收
         self.wm_last_pos = None
-        self.wm_pan_start = None        # 滑鼠右鍵平移拖曳起點
+        self.wm_pan_start = None        # 滑鼠平移拖曳起點
+        self.wm_tool_mode = "paint"     # "paint" (塗抹標記) 或 "pan" (抓手平移)
+        self.wm_space_held = False      # 空白鍵平移快捷狀態
 
         self._setup_icon()
         self._setup_style()
@@ -222,6 +224,22 @@ class EnhancerApp(tk.Tk):
 
         ttk.Button(row1, text="📂 開啟圖片", command=self._wm_pick_image).pack(side=tk.LEFT, padx=(0, 10))
 
+        # 工具模式切換：塗抹標記 / 抓手平移
+        tool_switch_frame = tk.Frame(row1, bg="#e2e8f0", padx=2, pady=2)
+        tool_switch_frame.pack(side=tk.LEFT, padx=(0, 8))
+        self.btn_tool_paint = tk.Button(
+            tool_switch_frame, text="✏️ 塗抹模式", font=("Microsoft JhengHei UI", 9, "bold"),
+            bg="#2563eb", fg="white", activebackground="#1d4ed8", activeforeground="white",
+            relief=tk.FLAT, padx=6, pady=2, cursor="hand2", command=lambda: self._wm_set_tool_mode("paint")
+        )
+        self.btn_tool_paint.pack(side=tk.LEFT, padx=1)
+        self.btn_tool_pan = tk.Button(
+            tool_switch_frame, text="✋ 移動畫布", font=("Microsoft JhengHei UI", 9),
+            bg="#ffffff", fg="#334155", activebackground="#f1f5f9", activeforeground="#1e293b",
+            relief=tk.FLAT, padx=6, pady=2, cursor="hand2", command=lambda: self._wm_set_tool_mode("pan")
+        )
+        self.btn_tool_pan.pack(side=tk.LEFT, padx=1)
+
         ttk.Label(row1, text="筆刷粗細：", background="#f4f5f7").pack(side=tk.LEFT)
         self.wm_slider = ttk.Scale(row1, from_=5, to=80, value=25, orient=tk.HORIZONTAL, command=self._wm_update_brush_size)
         self.wm_slider.pack(side=tk.LEFT, padx=(0, 4), fill=tk.X)
@@ -268,7 +286,7 @@ class EnhancerApp(tk.Tk):
         )
         self.btn_wm_send.pack(side=tk.LEFT, padx=4)
 
-        self.lbl_wm_info = ttk.Label(row2, text="💡 提示：滾輪可縮放視角(最高800%)，按住右鍵拖動畫布，左鍵塗抹浮水印", style="Status.TLabel")
+        self.lbl_wm_info = ttk.Label(row2, text="💡 提示：左鍵塗抹 (或選✋左鍵平移) | 空白鍵+左鍵拖曳 | 滾輪縮放 | 右鍵/中鍵直接拖曳", style="Status.TLabel")
         self.lbl_wm_info.pack(side=tk.RIGHT, padx=4)
 
         # 中央互動式畫布
@@ -294,6 +312,14 @@ class EnhancerApp(tk.Tk):
         # 移動時顯示筆刷大小光標
         self.wm_canvas.bind("<Motion>", self._wm_on_mouse_move)
         self.wm_canvas.bind("<Leave>", lambda e: self.wm_canvas.delete("brush_cursor"))
+        # 鍵盤空白鍵 (Space) 臨時切換抓手平移
+        self.bind_all("<KeyPress-space>", self._wm_on_space_down)
+        self.bind_all("<KeyRelease-space>", self._wm_on_space_up)
+        # 鍵盤方向鍵平移畫布微調
+        self.wm_canvas.bind("<Up>", lambda e: self._wm_pan_step(0, 40))
+        self.wm_canvas.bind("<Down>", lambda e: self._wm_pan_step(0, -40))
+        self.wm_canvas.bind("<Left>", lambda e: self._wm_pan_step(40, 0))
+        self.wm_canvas.bind("<Right>", lambda e: self._wm_pan_step(-40, 0))
 
         # 底部引擎與狀態提示列
         wm_status_frame = tk.Frame(parent, bg="#f4f5f7", padx=12, pady=4)
@@ -442,7 +468,7 @@ class EnhancerApp(tk.Tk):
         if not self.wm_orig_image:
             return
         old_zoom = self.wm_zoom_level
-        new_zoom = max(1.0, min(8.0, old_zoom * factor))
+        new_zoom = max(0.2, min(8.0, old_zoom * factor))
         if abs(new_zoom - old_zoom) < 0.01:
             return
 
@@ -461,18 +487,49 @@ class EnhancerApp(tk.Tk):
 
         self.wm_zoom_level = new_zoom
 
-        if new_zoom <= 1.0:
-            self.wm_pan_x = 0.0
-            self.wm_pan_y = 0.0
-        else:
-            new_dw = int(iw * new_eff)
-            new_dh = int(ih * new_eff)
-            new_dx = cx - img_x * new_eff
-            new_dy = cy - img_y * new_eff
-            self.wm_pan_x = new_dx - (cw - new_dw) // 2
-            self.wm_pan_y = new_dy - (ch - new_dh) // 2
+        new_dw = int(iw * new_eff)
+        new_dh = int(ih * new_eff)
+        new_dx = cx - img_x * new_eff
+        new_dy = cy - img_y * new_eff
+        self.wm_pan_x = new_dx - (cw - new_dw) // 2
+        self.wm_pan_y = new_dy - (ch - new_dh) // 2
 
         self.lbl_zoom.config(text=f"{int(self.wm_zoom_level * 100)}%")
+        self._wm_render_canvas()
+
+    def _wm_set_tool_mode(self, mode):
+        self.wm_tool_mode = mode
+        if mode == "paint":
+            self.btn_tool_paint.config(bg="#2563eb", fg="white", font=("Microsoft JhengHei UI", 9, "bold"))
+            self.btn_tool_pan.config(bg="#ffffff", fg="#334155", font=("Microsoft JhengHei UI", 9))
+            self.wm_canvas.config(cursor="crosshair")
+        else:
+            self.btn_tool_paint.config(bg="#ffffff", fg="#334155", font=("Microsoft JhengHei UI", 9))
+            self.btn_tool_pan.config(bg="#2563eb", fg="white", font=("Microsoft JhengHei UI", 9, "bold"))
+            self.wm_canvas.config(cursor="fleur")
+
+    def _wm_on_space_down(self, event):
+        # 僅在浮水印分頁生效
+        try:
+            if self.notebook.index(self.notebook.select()) != 1:
+                return
+        except Exception:
+            return
+        if not self.wm_space_held:
+            self.wm_space_held = True
+            self.wm_canvas.config(cursor="fleur")
+            self.wm_canvas.delete("brush_cursor")
+
+    def _wm_on_space_up(self, event):
+        self.wm_space_held = False
+        cursor = "fleur" if self.wm_tool_mode == "pan" else "crosshair"
+        self.wm_canvas.config(cursor=cursor)
+
+    def _wm_pan_step(self, dx, dy):
+        if not self.wm_orig_image:
+            return
+        self.wm_pan_x += dx
+        self.wm_pan_y += dy
         self._wm_render_canvas()
 
     def _wm_on_pan_down(self, event):
@@ -491,10 +548,14 @@ class EnhancerApp(tk.Tk):
 
     def _wm_on_pan_up(self, event):
         self.wm_pan_start = None
-        self.wm_canvas.config(cursor="crosshair")
+        cursor = "fleur" if (self.wm_tool_mode == "pan" or self.wm_space_held) else "crosshair"
+        self.wm_canvas.config(cursor=cursor)
 
     def _wm_on_mouse_move(self, event):
         if not self.wm_orig_image:
+            return
+        if self.wm_tool_mode == "pan" or self.wm_space_held:
+            self.wm_canvas.delete("brush_cursor")
             return
         self.wm_canvas.delete("brush_cursor")
         br = self.wm_brush_size
@@ -517,13 +578,21 @@ class EnhancerApp(tk.Tk):
         return max(0, min(self.wm_orig_image.width - 1, ix)), max(0, min(self.wm_orig_image.height - 1, iy))
 
     def _wm_on_mouse_down(self, event):
+        self.wm_canvas.focus_set()
         if not self.wm_orig_image:
+            return
+        # 若當前為平移模式或按住空白鍵，左鍵直接作為平移拖曳
+        if self.wm_tool_mode == "pan" or self.wm_space_held:
+            self._wm_on_pan_down(event)
             return
         self.wm_last_pos = (event.x, event.y)
         self._wm_paint_at(event.x, event.y)
 
     def _wm_on_mouse_drag(self, event):
         if not self.wm_orig_image:
+            return
+        if self.wm_tool_mode == "pan" or self.wm_space_held:
+            self._wm_on_pan_drag(event)
             return
         if self.wm_last_pos:
             self._wm_paint_line(self.wm_last_pos[0], self.wm_last_pos[1], event.x, event.y)
@@ -532,6 +601,9 @@ class EnhancerApp(tk.Tk):
         self.wm_last_pos = (event.x, event.y)
 
     def _wm_on_mouse_up(self, event):
+        if self.wm_tool_mode == "pan" or self.wm_space_held:
+            self._wm_on_pan_up(event)
+            return
         self.wm_last_pos = None
         if self.wm_mask:
             if len(self.wm_mask_history) > 12:

@@ -48,10 +48,22 @@ def main():
     res = subprocess.run(cmd_str, shell=True)
     if res.returncode == 0 and output_exe.exists():
         size_kb = output_exe.stat().st_size / 1024
+        
+        # 同步複製一份至 release/ 目錄供 GitHub Release 發布使用
+        release_dir = root_dir / "release"
+        release_dir.mkdir(parents=True, exist_ok=True)
+        release_exe = release_dir / "圖片畫質提高工具.exe"
+        try:
+            import shutil
+            shutil.copy2(output_exe, release_exe)
+        except Exception:
+            pass
+
         print()
         print("=" * 55)
         print(f"  🎉 編譯成功！已在根目錄產生：{output_exe.name}")
         print(f"  📦 檔案大小: {size_kb:.1f} KB (已內嵌相機鏡頭圖示，無黑視窗)")
+        print(f"  🚀 已同步複製一份至: {release_exe}")
         print("=" * 55)
         return True
     else:
