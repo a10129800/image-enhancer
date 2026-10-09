@@ -10,26 +10,10 @@ ASSETS_DIR = ROOT_DIR / "assets"
 ASSETS_DIR.mkdir(exist_ok=True)
 
 def find_uploaded_screenshot():
-    # 搜尋已上傳的截圖
-    candidates = [
-        Path(r"C:\Users\mice\.gemini\antigravity-ide\brain\4a990e4f-7495-4a12-af4a-bf4993b67fb1\.user_uploaded\media_1791537731563.png"),
-        Path.home() / ".gemini" / "antigravity-ide" / "brain" / "4a990e4f-7495-4a12-af4a-bf4993b67fb1" / ".user_uploaded" / "media_1791537731563.png",
-    ]
-    for c in candidates:
-        if c.exists() and c.stat().st_size > 50000:
-            print(f"[+] 找到已上傳的完整視窗截圖: {c}")
-            return c
-
-    # 在 .gemini 目錄下深度搜尋
-    gemini_dir = Path.home() / ".gemini"
-    if gemini_dir.exists():
-        try:
-            for p in gemini_dir.rglob("media_1791537731563.png"):
-                if p.is_file() and p.stat().st_size > 50000:
-                    print(f"[+] 深度搜尋找到截圖: {p}")
-                    return p
-        except Exception:
-            pass
+    # 若本地 assets 已有高品質預覽圖，直接沿用
+    local_preview = ASSETS_DIR / "gui_preview.png"
+    if local_preview.exists() and local_preview.stat().st_size > 50000:
+        return local_preview
     return None
 
 def capture_from_running_window():

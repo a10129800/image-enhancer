@@ -9,9 +9,7 @@ env/
 # 本機管理與推送腳本 (不公開至 GitHub)
 git_push.bat
 git_push.py
-build_launcher.bat
-create_release.bat
-create_release.py
+scripts/
 dist/
 *.lnk
 
@@ -38,5 +36,7 @@ Thumbs.db
 *.code-workspace
 
 # 本機編譯之二進位啟動器 (不進 Git 倉庫)
+*.exe
 圖片畫質提高工具.exe
+
 

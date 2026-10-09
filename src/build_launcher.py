@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 from pathlib import Path
 
@@ -14,23 +13,6 @@ def main():
     launcher_cs = root_dir / "src" / "launcher.cs"
     icon_path = root_dir / "assets" / "app.ico"
     output_exe = root_dir / "圖片畫質提高工具.exe"
-
-    # 同步更新 Demo2.png 展示截圖至 assets
-    try:
-        from src.crop_demo2 import crop_app_window
-        latest_demo2 = Path(r"C:\Users\mice\.gemini\antigravity-ide\brain\c76d24df-8eaa-44b9-90c0-75c423faeaad\.user_uploaded\media_1791533812818.png")
-        if latest_demo2.exists():
-            crop_app_window(latest_demo2, root_dir / "assets" / "Demo2.png")
-    except Exception:
-        pass
-
-    # 清理根目錄重複與殘留暫存檔
-    for redundant in [root_dir / "Demo2.png", root_dir / "圖片畫質提高工具.lnk"]:
-        if redundant.exists():
-            try:
-                redundant.unlink()
-            except Exception:
-                pass
 
     if not launcher_cs.exists():
         print(f"[❌ 錯誤] 找不到原始碼: {launcher_cs}")

@@ -7,14 +7,9 @@ ROOT_DIR = SRC_DIR.parent
 BIN_DIR = ROOT_DIR / "bin"
 
 def get_ai_bin():
-    candidates = [
-        BIN_DIR / "realesrgan-ncnn-vulkan.exe",
-        ROOT_DIR / "realesrgan-ncnn-vulkan.exe",
-        SRC_DIR / "realesrgan-ncnn-vulkan.exe"
-    ]
-    for c in candidates:
-        if c.exists():
-            return c
+    bin_file = BIN_DIR / "realesrgan-ncnn-vulkan.exe"
+    if bin_file.exists():
+        return bin_file
     system_bin = shutil.which("realesrgan-ncnn-vulkan")
     return Path(system_bin) if system_bin else None
 
@@ -40,29 +35,7 @@ def enhance_image(path: str, scale: int = 4):
         print(f"AI 修復完成: {dst}")
         return
 
-    # 2. Pillow 降級
-    try:
-        from PIL import Image, ImageEnhance, ImageFilter
-        with Image.open(src) as im:
-            mode = im.mode
-            img = im.resize((im.width * 2, im.height * 2), Image.Resampling.LANCZOS)
-            img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=150, threshold=3))
-            img = ImageEnhance.Contrast(img).enhance(1.08)
-            img = ImageEnhance.Color(img).enhance(1.05) if mode in ("RGB", "RGBA") else img
-            img.save(dst, quality=95)
-            print(f"Pillow 降級濾鏡修復完成: {dst}")
-            return
-    except ImportError:
-        pass
-
-    # 3. ffmpeg 兜底
-    if shutil.which("ffmpeg"):
-        vf = "scale=iw*2:ih*2:flags=lanczos,unsharp=5:5:1.0:5:5:0.0"
-        subprocess.run(["ffmpeg", "-y", "-i", str(src), "-vf", vf, str(dst)], check=True)
-        print(f"ffmpeg 降級修復完成: {dst}")
-        return
-
-    messagebox.showerror("錯誤", "無法找到可用修復引擎。請先啟動軟體下載 AI 引擎。")
+    messagebox.showerror("錯誤", "無法找到或下載 AI 引擎 (realesrgan-ncnn-vulkan)。請檢查網路後重試。")
 
 if __name__ == "__main__":
     files = sys.argv[1:]

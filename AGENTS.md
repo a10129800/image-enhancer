@@ -23,3 +23,5 @@
   - `圖片畫質提高工具.exe`（原生無黑視窗 C# 啟動器）
 - 開發者一鍵推送工具：
   - `git_push.bat` -> 自動觸發 `git_push.py`，完成目錄整理、截圖校驗、內部腳本隔離、Commit 與 Push。
+- 內部維護與打包發布工具：
+  - 統一收納至 `scripts/`（如 `create_release.bat`、`build_launcher.bat`），避免根目錄雜亂。
