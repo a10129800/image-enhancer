@@ -4,12 +4,14 @@ from tkinter import messagebox
 
 SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
-BIN_DIR = ROOT_DIR / "bin"
+CORE_DIR = ROOT_DIR / "core"
+BIN_DIR = CORE_DIR if CORE_DIR.exists() else (ROOT_DIR / "bin")
 
 def get_ai_bin():
-    bin_file = BIN_DIR / "realesrgan-ncnn-vulkan.exe"
-    if bin_file.exists():
-        return bin_file
+    for d in [ROOT_DIR / "core", ROOT_DIR / "bin"]:
+        bin_file = d / "realesrgan-ncnn-vulkan.exe"
+        if bin_file.exists():
+            return bin_file
     system_bin = shutil.which("realesrgan-ncnn-vulkan")
     return Path(system_bin) if system_bin else None
 

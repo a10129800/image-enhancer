@@ -3,7 +3,8 @@ from pathlib import Path
 
 SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
-BIN_DIR = ROOT_DIR / "bin"
+CORE_DIR = ROOT_DIR / "core"
+BIN_DIR = CORE_DIR if (CORE_DIR.exists() or not (ROOT_DIR / "bin").exists()) else (ROOT_DIR / "bin")
 
 # 提供官方來源與多組鏡像加速節點
 URLS = [

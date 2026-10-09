@@ -16,7 +16,8 @@ except Exception:
 
 SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
-BIN_DIR = ROOT_DIR / "bin"
+CORE_DIR = ROOT_DIR / "core"
+BIN_DIR = CORE_DIR if CORE_DIR.exists() else (ROOT_DIR / "bin")
 
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
@@ -673,6 +674,7 @@ class EnhancerApp(tk.Tk):
 
     def _get_ai_bin(self):
         candidates = [
+            ROOT_DIR / "core" / "realesrgan-ncnn-vulkan.exe",
             BIN_DIR / "realesrgan-ncnn-vulkan.exe",
             ROOT_DIR / "realesrgan-ncnn-vulkan.exe",
             SRC_DIR / "realesrgan-ncnn-vulkan.exe"
