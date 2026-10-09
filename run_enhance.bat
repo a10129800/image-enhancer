@@ -1,3 +1,3 @@
 @echo off
 chcp 65001 >nul
-start "" pythonw "%~dp0gui.py"
+start "" pythonw "%~dp0src\gui.py"

@@ -17,9 +17,10 @@
 
 ![軟體主介面](assets/Demo2.png)
 
-- **原生輕量**：採用 Python 內建 GUI，免安裝肥大的第三方視窗框架。
-- **背景執行**：批次處理時介面流暢不卡頓，具備即時進度條與狀態指示。
-- **一鍵開啟**：處理完成後可直接點擊「開啟所在資料夾」檢視產出成果。
+- **📜 執行歷程與處理記錄框**：逐行實時記錄時間戳記、圖片處理狀態與中斷資訊，流程完全透明。
+- **⏹️ 放大到一半即時取消**：運算中隨時可點擊「取消修復」，瞬間終止 GPU 行程並自動清理半成品破損檔案。
+- **🖥️ 高解析度 ClearType 排版**：完美支援 Windows High-DPI (125%/150%) 縮放，微軟正黑體向量渲染，清晰銳利不模糊。
+- **📁 一鍵開啟**：處理完成後可直接點擊「開啟所在資料夾」檢視產出成果。
 
 ---
 
@@ -31,9 +32,11 @@
    - `realesr-animevideov3`：高速模式，兼顧速度與品質。
 2. **⚡ 免配 Python 深度學習環境**：
    - 無需安裝數 GB 的 PyTorch、CUDA 或繁複環境變數，基於 ncnn Vulkan 輕量執行檔即可流暢運行。
-3. **📂 批次多圖處理**：
-   - 支援一次選取多張圖片（Ctrl / Shift 多選），自動循序批次完成修復。
-4. **🛡️ 三段式降級兜底保障**：
+3. **📂 批次多圖與即時狀態監控**：
+   - 支援多圖選取循序處理，歷程記錄框即時顯示單圖進度與時間戳記。
+4. **⏹️ 毫秒級中斷與安全清理**：
+   - 放大到一半可隨時中止，立即釋放 GPU 資源，並自動清除未完成之中繼檔案。
+5. **🛡️ 三段式降級兜底保障**：
    - 若未啟用 AI 引擎，自動降級為 Pillow 高品質 Lanczos 2x 插值 + UnsharpMask 銳化濾鏡；皆無時自動調用 ffmpeg。
 
 ---
@@ -70,13 +73,14 @@ image-enhancer/
 ├── assets/                  # 成果對比與軟體介面展示截圖
 │   ├── DEMO.png
 │   └── Demo2.png
+├── src/                     # 軟體核心原始碼
+│   ├── gui.py               # 圖形介面主程式 (Tkinter / ttk)
+│   ├── enhance_image.py     # 超解析度修復核心
+│   └── download_ai_engine.py# AI 引擎下載管理
+├── bin/                     # (本機下載) Real-ESRGAN Vulkan 執行檔與模型
 ├── samples/                 # 測試素材範例
 ├── docs/                    # 相關參考文檔
-├── gui.py                   # 圖形化介面主程式 (Tkinter / ttk)
-├── enhance_image.py         # 核心修復邏輯 (AI / Pillow / ffmpeg 三段式)
-├── download_ai_engine.py    # AI 引擎下載與配置輔助模組
-├── run_enhance.bat          # 軟體一鍵啟動入口
-├── git_push.bat             # GitHub 一鍵同步推送工具
+├── run_enhance.bat          # 🚀 軟體唯一一鍵啟動入口
 ├── requirements.txt         # 相依套件說明
 ├── LICENSE                  # MIT 開源授權
 └── README.md                # 專案完整說明文檔
